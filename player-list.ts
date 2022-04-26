@@ -1,23 +1,23 @@
-import Room from "./room.js"
+import Player from "./player.js"
 
 
-interface RoomOptions {
+interface PlayerOptions {
   name: string
   maxPlayers: number
 }
 
-export default class RoomList {
-  rooms: Map<number, Room>
+export default class PlayerList {
+  players: Map<number, Player>
   lastId: number
 
   constructor () {
-    this.rooms = new Map()
+    this.players = new Map()
     this.lastId = 0
   }
 
-  addRoom ({ name, maxPlayers }: RoomOptions) {
+  addRoom ({ name, maxPlayers }: PlayerOptions) {
     const id = this.lastId + 1
-    const room = new Room({ id, name, maxPlayers })
+    const player = new Player({ id, name, maxPlayers })
     this.rooms.set(id, room)
     return id
   }

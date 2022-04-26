@@ -1,4 +1,4 @@
-import { Server } from 'http'
+import { IncomingMessage, Server } from 'http'
 import { readFile } from 'fs/promises'
 import Game from './game.js'
 
@@ -23,7 +23,7 @@ export default class GameServer extends Server {
     super()
     this.game = new Game()
     this.files = {}
-    this.on('request', (req, res) => {
+    this.on('request', async (req, res) => {
       if (req.url === undefined) {
         res.writeHead(404)
         res.end('Not found')
@@ -44,6 +44,8 @@ export default class GameServer extends Server {
         const path = (req.url.match(/^\/api\/(.*)$/) as string[])[1]
         switch (path) {
           case 'gethash':
+            const reqBody = await GameServer.parseBody(req)
+            console.log(reqBody)
             const hash = 'hash'
             res.writeHead(200)
             res.end(hash)
@@ -70,5 +72,14 @@ export default class GameServer extends Server {
     }
     this.files['/'] = this.files['/index.html']
     this.listen(port)
+  }
+
+  static async parseBody (req: IncomingMessage) {
+    return new Promise((resolve, reject) => {
+      let str = ''
+      req.on('data', (c) => { str = str + c.toString() })
+      req.on('end', () => { resolve(str) })
+      req.on('error', reject)
+    })
   }
 }
