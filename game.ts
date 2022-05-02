@@ -1,13 +1,14 @@
-import Room from 'room.js'
 import { EventEmitter } from 'events'
-import RoomList from './room-list.js'
-import PlayerList from './player-list.js'
+import RoomsList from './rooms-list.js'
+import PlayersList from './players-list.js'
 
-export default class Game {
-  rooms: RoomList
-  players: PlayerList
+export default class Game extends EventEmitter {
+  rooms: RoomsList
+  players: PlayersList
 
   constructor () {
-    this.rooms = new RoomList()
+    super()
+    this.rooms = new RoomsList(this)
+    this.players = new PlayersList(this)
   }
 }

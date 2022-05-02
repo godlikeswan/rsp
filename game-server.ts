@@ -53,6 +53,15 @@ export default class GameServer extends Server {
           case 'getrooms':
             res.writeHead(200)
             res.end(JSON.stringify(this.game.rooms))
+            break
+          case 'getroomschange':
+            this.game.on('changerooms', () => {
+              res.writeHead(200)
+              res.end(JSON.stringify(this.game.rooms))
+            })
+            break
+          case 'addroom':
+            this.game.rooms.addRoom({ name: 'hello', maxPlayers: 5 })
         }
       }
     })

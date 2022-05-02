@@ -1,7 +1,12 @@
-import RoomList from './room-list.js';
-export default class Game {
+import { EventEmitter } from 'events';
+import RoomsList from './rooms-list.js';
+import PlayersList from './players-list.js';
+export default class Game extends EventEmitter {
     rooms;
+    players;
     constructor() {
-        this.rooms = new RoomList();
+        super();
+        this.rooms = new RoomsList(this);
+        this.players = new PlayersList(this);
     }
 }

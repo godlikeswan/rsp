@@ -9,6 +9,11 @@ export default class Room {
         this.maxPlayers = maxPlayers;
         this.players = [];
     }
-    edit(room) { }
+    setName(name) {
+        this.name = name;
+    }
+    setMaxPlayers(maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
     remove() { }
 }

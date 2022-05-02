@@ -16,19 +16,32 @@ async function getRooms () {
   return rooms
 }
 
-async function renderRooms (nickname) {
+async function startRoomsUpdateLoop () {
+  while ('state' in globalThis && globalThis.state === 'lobby') {
+    const res = await fetch('/api/getroomschange')
+    const rooms = await res.json()
+    renderRooms(rooms)
+  }
+}
+
+async function initRooms (nickname) {
+  globalThis.state = 'lobby'
   if (!('hash' in globalThis) && nickname) {
     globalThis.hash = await getHash(nickname)
   }
   const rooms = await getRooms()
-  console.log('hello', typeof rooms)
+  console.log(rooms)
+  renderRooms(rooms)
+}
+
+function renderRooms (rooms) {
   const tbody = document.querySelector('tbody') // ????????
   tbody.innerHTML = rooms.map((room) => `<tr>
 <td>${room.id}</td>
 <td>${room.name}</td>
 <td>${room.numPlayers}/${room.maxPlayers}</td>
 <td><a href="#room" onclick="renderRoom(${room.id})">-></a></td>
-</tr>`).join('\n')
+</tr>`).join('\n') + '<tr><td><input type="text"></td><td><a href="#room">+</a></td></tr>'
 // TODO: create new room row
 }
 
@@ -44,5 +57,4 @@ async function joinRoom (roomId) {
 
 async function renderRoom (roomId) {
   const room = joinRoom(roomId)
-
 }

@@ -19,6 +19,13 @@ export default class Room {
     this.players = []
   }
 
-  edit (room: Room) {}
+  setName (name: string) {
+    this.name = name
+  }
+
+  setMaxPlayers (maxPlayers: number) {
+    this.maxPlayers = maxPlayers
+  }
+
   remove () {}
 }
