@@ -1,5 +1,0 @@
-buttons r s and p
-button <- (back) in room
-buttons -> (go) in rooms
-compose all in one page
-animations
