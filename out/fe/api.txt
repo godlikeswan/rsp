@@ -1,0 +1,4 @@
+createPlayer(nick) -> hash
+getRooms() -> roomList
+joinRoom(roomId) -> room
+choose(shape) -> result of match

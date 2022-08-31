@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js"></script>
+  <title>RSP</title>
+</head>
+<body>
+  <section id="rooms">
+    <header>
+      <div class="logo"><h1>RSP</h1><p>Rock<br>Scissors<br>Paper</p></div>
+      <div class="nickname">ttrolka</div>
+    </header>
+    <main class="rooms">
+      <table>
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>name</th>
+            <th>players</th>
+            <th>action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>First room</td><td>1/2</td><td><a href="#room">-></a></td></tr>
+          <tr><td>2</td><td>Second room</td><td>3/5</td><td>-></td></tr>
+          <tr><td>3</td><td>Third room</td><td>2/2</td><td>-></td></tr>
+          <tr><td>+</td><td></td><td></td><td>=)</td></tr>
+        </tbody>
+      </table>
+    </main>
+  </section>
+  <section id="room">
+    <header>
+      <div class="logo"><h1>RSP</h1><p>Rock<br>Scissors<br>Paper</p></div>
+      <div class="nickname">ttrolka</div>
+    </header>
+    <main class="room">
+      <a class="button-back" href="#rooms"><span>←</span></a>
+      <div id="table">
+        <div class="player player1">ttrolka</div>
+        <div class="player player2">enbh</div>
+        <div class="player player3">player3</div>
+        <div class="buttons">
+          <button>o</button><button>x</button><button>h</button>
+        </div>
+      </div>
+    </main>
+  </section>
+  <section id="home">
+  <div class="logo"><h1>RSP</h1><p>Rock<br>Scissors<br>Paper</p></div>
+  <div class="form">
+    <input type="text" name="" id="" placeholder="Enter your nickname&hellip;"><a href="#rooms" onclick="initRooms(document.querySelector('input[type=\'text\']').value)"><span>→</span></a>
+  </div>
+  </section>
+</body>
+</html>

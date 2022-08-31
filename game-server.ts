@@ -1,4 +1,4 @@
-import { Server } from 'http'
+import { IncomingMessage, Server } from 'http'
 import { readFile } from 'fs/promises'
 import Game from './game.js'
 
@@ -23,7 +23,7 @@ export default class GameServer extends Server {
     super()
     this.game = new Game()
     this.files = {}
-    this.on('request', (req, res) => {
+    this.on('request', async (req, res) => {
       if (req.url === undefined) {
         res.writeHead(404)
         res.end('Not found')
@@ -42,15 +42,29 @@ export default class GameServer extends Server {
       }
       if (/^\/api\//.test(req.url)) {
         const path = (req.url.match(/^\/api\/(.*)$/) as string[])[1]
+        const reqBody = await GameServer.parseBody(req)
         switch (path) {
           case 'gethash':
-            const hash = 'hash'
-            res.writeHead(200)
-            res.end(hash)
+            this.game.handleGetHash(reqBody, res)
             break
           case 'getrooms':
-            res.writeHead(200)
-            res.end(JSON.stringify(this.game.rooms))
+            this.game.handleGetRooms(reqBody, res)
+            break
+          case 'getroomschange':
+            this.game.handleGetRoomsChange(reqBody, res)
+            break
+          case 'addroom':
+            this.game.handleAddRoom(reqBody, res)
+            break
+          case 'joinroom':
+            this.game.handleJoinRoom(reqBody, res)
+            break
+          case 'move':
+            this.game.handleMove(reqBody, res)
+            break
+          case 'getroomchanged':
+            this.game.handleGetRoomChange(reqBody, res)
+            break
         }
       }
     })
@@ -65,10 +79,24 @@ export default class GameServer extends Server {
       } catch (e) {
         throw e
       }
-      // console.log(fileContents)
+      if (fileContents === null) {
+        process.exitCode = 1
+        return
+      }
       this.files['/' + fileName] = fileContents
     }
     this.files['/'] = this.files['/index.html']
     this.listen(port)
+  }
+
+  static async parseBody (req: IncomingMessage) {
+    const body = await new Promise((resolve, reject) => {
+      let str = ''
+      req.on('data', (c) => { str = str + c.toString() })
+      req.on('end', () => { resolve(str) })
+      req.on('error', reject)
+    })
+    if (body === '') return null
+    return JSON.parse(body as string)
   }
 }
