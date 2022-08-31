@@ -42,26 +42,29 @@ export default class GameServer extends Server {
       }
       if (/^\/api\//.test(req.url)) {
         const path = (req.url.match(/^\/api\/(.*)$/) as string[])[1]
+        const reqBody = await GameServer.parseBody(req)
         switch (path) {
           case 'gethash':
-            const reqBody = await GameServer.parseBody(req)
-            console.log(reqBody)
-            const hash = 'hash'
-            res.writeHead(200)
-            res.end(hash)
+            this.game.handleGetHash(reqBody, res)
             break
           case 'getrooms':
-            res.writeHead(200)
-            res.end(JSON.stringify(this.game.rooms))
+            this.game.handleGetRooms(reqBody, res)
             break
           case 'getroomschange':
-            this.game.on('changerooms', () => {
-              res.writeHead(200)
-              res.end(JSON.stringify(this.game.rooms))
-            })
+            this.game.handleGetRoomsChange(reqBody, res)
             break
           case 'addroom':
-            this.game.rooms.addRoom({ name: 'hello', maxPlayers: 5 })
+            this.game.handleAddRoom(reqBody, res)
+            break
+          case 'joinroom':
+            this.game.handleJoinRoom(reqBody, res)
+            break
+          case 'move':
+            this.game.handleMove(reqBody, res)
+            break
+          case 'getroomchanged':
+            this.game.handleGetRoomChange(reqBody, res)
+            break
         }
       }
     })
@@ -76,7 +79,10 @@ export default class GameServer extends Server {
       } catch (e) {
         throw e
       }
-      // console.log(fileContents)
+      if (fileContents === null) {
+        process.exitCode = 1
+        return
+      }
       this.files['/' + fileName] = fileContents
     }
     this.files['/'] = this.files['/index.html']
@@ -84,11 +90,13 @@ export default class GameServer extends Server {
   }
 
   static async parseBody (req: IncomingMessage) {
-    return new Promise((resolve, reject) => {
+    const body = await new Promise((resolve, reject) => {
       let str = ''
       req.on('data', (c) => { str = str + c.toString() })
       req.on('end', () => { resolve(str) })
       req.on('error', reject)
     })
+    if (body === '') return null
+    return JSON.parse(body as string)
   }
 }

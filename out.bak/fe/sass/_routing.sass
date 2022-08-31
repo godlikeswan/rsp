@@ -1,0 +1,17 @@
+body
+  // position: relative
+
+section
+  display: none
+  // position: absolute
+  // top: 0
+  // width: 100%
+
+  &:target
+    display: block
+
+#home
+  display: block
+
+section:target+#home, section:target+section+#home
+  display: none
