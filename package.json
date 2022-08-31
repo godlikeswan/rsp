@@ -5,8 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node out/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node out",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build_backend && npm run build_frontend",
+    "build_backend": "npx tsc",
+    "build_frontend": "npx sass && node -e \"const fs = require('node:fs/promises');fs.mkdir('./out/public', { recursive: true }).then(() => { fs.copyFile('./frontend/index.html', './out/public/index.html') })\""
   },
   "keywords": [],
   "author": "",
@@ -14,5 +17,8 @@
   "dependencies": {
     "@types/node": "^17.0.24",
     "typescript": "^4.6.3"
+  },
+  "devDependencies": {
+    "sass": "^1.54.7"
   }
 }
