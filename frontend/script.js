@@ -22,7 +22,8 @@ async function getRooms () {
     },
     body: JSON.stringify({ hash })
   })
-  const rooms = await res.json()
+  const { last, rooms } = await res.json()
+  globalThis.last = last
   return rooms
 }
 
@@ -36,12 +37,16 @@ async function startRoomsUpdateLoop () {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ hash }),
+        body: JSON.stringify({ hash, last: globalThis.last }),
         signal: globalThis.controller.signal
       })
-      const rooms = await res.json()
+      const { rooms, last } = await res.json()
+      globalThis.last = last
       renderRooms(rooms)
-    } catch (e) { console.log(e) }
+    } catch (e) {
+      console.log(e)
+      await wait(1000)
+    }
   }
 }
 
@@ -72,12 +77,13 @@ async function joinRoom (id) {
     method: 'POST',
     body: JSON.stringify({ hash, id })
   })
-  const room = await res.json()
+  const { last, room } = await res.json()
+  globalThis.last = last
+  globalThis.state = 'room'
   return room
 }
 
 async function initRoom (id) {
-  globalThis.state = 'room'
   globalThis.controller.abort()
   const room = await joinRoom(id)
   renderRoom(room)
@@ -93,10 +99,11 @@ async function startRoomUpdateLoop () {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ hash: globalThis.hash }),
+        body: JSON.stringify({ hash: globalThis.hash, last: globalThis.last }),
         signal: globalThis.controller.signal
       })
-      const rooms = await res.json()
+      const { last, rooms } = await res.json()
+      globalThis.last = last
       renderRooms(rooms)
     } catch (e) { console.log(e) }
   }
@@ -133,3 +140,10 @@ async function move (shape) {
   })
   const j = await res.json()
 }
+
+async function wait (ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+

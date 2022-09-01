@@ -75,7 +75,7 @@ export default class GameServer extends Server {
     for (const fileName of fileNames) {
       let fileContents = null
       try {
-        fileContents = await readFile(new URL('public/' + fileName, import.meta.url).pathname.slice(3), { encoding: 'utf-8' })
+        fileContents = await readFile(new URL('public/' + fileName, import.meta.url).pathname, { encoding: 'utf-8' })
       } catch (e) {
         throw e
       }
@@ -86,7 +86,7 @@ export default class GameServer extends Server {
       this.files['/' + fileName] = fileContents
     }
     this.files['/'] = this.files['/index.html']
-    this.listen(port)
+    this.listen(port, () => { console.log('server listening on localahost:%i', port) })
   }
 
   static async parseBody (req: IncomingMessage) {
