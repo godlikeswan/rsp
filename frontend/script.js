@@ -23,6 +23,7 @@ async function getRooms () {
     body: JSON.stringify({ hash })
   })
   const { last, rooms } = await res.json()
+  console.log(rooms)
   globalThis.last = last
   return rooms
 }
@@ -40,7 +41,9 @@ async function startRoomsUpdateLoop () {
         body: JSON.stringify({ hash, last: globalThis.last }),
         signal: globalThis.controller.signal
       })
-      const { rooms, last } = await res.json()
+      const json = await res.json()
+      if ('next' in json) continue
+      const { rooms, last } = json
       globalThis.last = last
       renderRooms(rooms)
     } catch (e) {
@@ -102,7 +105,8 @@ async function startRoomUpdateLoop () {
         body: JSON.stringify({ hash: globalThis.hash, last: globalThis.last }),
         signal: globalThis.controller.signal
       })
-      const { last, rooms } = await res.json()
+      const json = await res.json()
+      const { last, rooms } = json
       globalThis.last = last
       renderRooms(rooms)
     } catch (e) { console.log(e) }
