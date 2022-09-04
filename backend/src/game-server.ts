@@ -62,7 +62,7 @@ export default class GameServer extends Server {
           case 'move':
             this.game.handleMove(reqBody, res)
             break
-          case 'getroomchanged':
+          case 'getroomchange':
             this.game.handleGetRoomChange(reqBody, res)
             break
         }

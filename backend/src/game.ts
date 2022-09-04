@@ -60,7 +60,8 @@ export default class Game { // TODO: add time tracking to events, add match even
     if (!player) throw new Error('There is no player with this hash')
     player.joinRoom(id)
     res.end(JSON.stringify({ room: this.rooms.getRoom(id).stringify(), last: this.rooms.getRoom(id).lastChangeTime }))
-    console.log('player ', hash, ' joined the room ', this.rooms.getRoom(id))
+    console.log('player ', hash, ' joined the room ', id)
+    console.log('sended: ', JSON.stringify({ room: this.rooms.getRoom(id).stringify(), last: this.rooms.getRoom(id).lastChangeTime }))
   }
 
   handleMove (reqBody: unknown, res: ServerResponse) {
@@ -74,10 +75,13 @@ export default class Game { // TODO: add time tracking to events, add match even
   async handleGetRoomChange (reqBody: unknown, res: ServerResponse) {
     const { id, last } = reqBody as { id: number, last: number }
     const room = this.rooms.getRoom(id)
+    console.log('handleGetRoomChange(%d, %d): ', id, last)
     if (last < room.lastChangeTime) {
-      res.end({ room: room.stringify(), last: room.lastChangeTime })
+      console.log('last < room.last')
+      res.end(JSON.stringify({ room: room.stringify(), last: room.lastChangeTime }))
       return
     }
+    console.log('last > room.last')
     res.end(await Promise.race([this.waitForRoomChange(id), this.timeout()]))
   }
 
@@ -97,8 +101,10 @@ export default class Game { // TODO: add time tracking to events, add match even
 
   async waitForRoomChange (roomId: number) {
     return new Promise((resolve) => {
-      this.rooms.getRoom(roomId).once('roomschange', () => {
-        resolve(JSON.stringify({ room: this.rooms.getRoom(roomId) }))
+      this.rooms.getRoom(roomId).once('change', () => {
+        const room = this.rooms.getRoom(roomId)
+        console.log('last: ', room.lastChangeTime)
+        resolve(JSON.stringify({ room: room.stringify(), last: room.lastChangeTime }))
       })
     })
   }

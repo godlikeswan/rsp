@@ -29,6 +29,7 @@ export default class Room extends EventEmitter {
     this.playersHashes = new Map()
     this.lastChangeTime = Date.now()
     this.startMatch = this.startMatch.bind(this)
+    this.on('change', () => { this.lastChangeTime = Date.now() })
   }
 
   setName (name: string) {
@@ -56,7 +57,7 @@ export default class Room extends EventEmitter {
       this.playersHashes.set(hash, null)
     }
     this.state = 'match'
-    this.emit('changed', 'match started')
+    this.emit('change', 'match started')
   }
 
   handleLeavedPlayer (player: Player) {
@@ -129,6 +130,7 @@ export default class Room extends EventEmitter {
   stringify () {
     const players = Array.from(this.playersHashes.keys()).map((hash) => this.game.players.getPlayer(hash))
     const { id, name, maxPlayers, state } = this
-    return JSON.stringify({ name, players, state })
+    // return JSON.stringify({ name, players, state })
+    return { name, players, state }
   }
 }

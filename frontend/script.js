@@ -42,6 +42,7 @@ async function startRoomsUpdateLoop () {
         signal: globalThis.controller.signal
       })
       const json = await res.json()
+      console.log('got: ', json)
       if ('next' in json) continue
       const { rooms, last } = json
       globalThis.last = last
@@ -93,7 +94,7 @@ async function initRoom (id) {
   startRoomUpdateLoop(id)
 }
 
-async function startRoomUpdateLoop () {
+async function startRoomUpdateLoop (id) {
   globalThis.controller = new AbortController()
   while ('state' in globalThis && globalThis.state === 'room') {
     try {
@@ -102,21 +103,26 @@ async function startRoomUpdateLoop () {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ hash: globalThis.hash, last: globalThis.last }),
+        body: JSON.stringify({ id, last: globalThis.last }),
+        // body: JSON.stringify({ hash: globalThis.hash, last: globalThis.last }),
         signal: globalThis.controller.signal
       })
       const json = await res.json()
-      const { last, rooms } = json
+      if ('next' in json) continue
+      const { last, room } = json
       globalThis.last = last
-      renderRooms(rooms)
-    } catch (e) { console.log(e) }
+      renderRoom(room)
+    } catch (e) {
+      console.log(e)
+      await wait(1000)
+    }
   }
 }
 
 function renderRoom (room) {
   const table = document.getElementById('table')
   table.innerHTML = room.players.map((player, i, a) => `<div class="player" style="top: ${getCoordinates(i / a.length).y}%; left: ${getCoordinates(i / a.length).x}%;">${player.name}</div>`)
-    .join('\n') + (/waiting|break/.test(room.state)) ? 'waiting for players...' : `<div class="buttons"><button onclick="move('rock')">o</button><button onclick="move('scissors')>x</button><button onclick="move('paper')>h</button></div>`
+    .join('\n') + ((/waiting|break/.test(room.state)) ? 'waiting for players...' : `<div class="buttons"><button onclick="move('rock')">o</button><button onclick="move('scissors')>x</button><button onclick="move('paper')>h</button></div>`)
 }
 
 async function createRoom (name, maxPlayers) {
