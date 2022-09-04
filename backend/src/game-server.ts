@@ -1,6 +1,7 @@
 import { IncomingMessage, Server } from 'http'
 import { readFile } from 'fs/promises'
 import Game from './game.js'
+import { fileURLToPath } from 'node:url';
 
 type Files = {
   [fileName: string]: string
@@ -75,7 +76,8 @@ export default class GameServer extends Server {
     for (const fileName of fileNames) {
       let fileContents = null
       try {
-        fileContents = await readFile(new URL('public/' + fileName, import.meta.url).pathname, { encoding: 'utf-8' })
+        const filepath = fileURLToPath(new URL('public/' + fileName, import.meta.url))
+        fileContents = await readFile(filepath, { encoding: 'utf-8' })
       } catch (e) {
         throw e
       }
@@ -86,7 +88,7 @@ export default class GameServer extends Server {
       this.files['/' + fileName] = fileContents
     }
     this.files['/'] = this.files['/index.html']
-    this.listen(port, () => { console.log('server listening on localahost:%i', port) })
+    this.listen(port, () => { console.log('server listening on http://localhost:%i', port) })
   }
 
   static async parseBody (req: IncomingMessage) {
