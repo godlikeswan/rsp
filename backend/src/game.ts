@@ -68,7 +68,7 @@ export default class Game { // TODO: add time tracking to events, add match even
     interface MoveReq { hash: string, shape: string }
     const { hash, shape } = reqBody as MoveReq
     this.players.getPlayer(hash)?.move(shape)
-    res.end()
+    res.end(JSON.stringify({ result: 'ok' }))
     console.log('player ', hash, ' made a move ', shape)
   }
 

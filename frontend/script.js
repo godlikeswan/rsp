@@ -122,7 +122,7 @@ async function startRoomUpdateLoop (id) {
 function renderRoom (room) {
   const table = document.getElementById('table')
   table.innerHTML = room.players.map((player, i, a) => `<div class="player" style="top: ${getCoordinates(i / a.length).y}%; left: ${getCoordinates(i / a.length).x}%;">${player.name}</div>`)
-    .join('\n') + ((/waiting|break/.test(room.state)) ? 'waiting for players...' : `<div class="buttons"><button onclick="move('rock')">o</button><button onclick="move('scissors')>x</button><button onclick="move('paper')>h</button></div>`)
+    .join('\n') + ((/^match$/.test(room.state)) ? `<div class="buttons"><button onclick="move('rock')">o</button><button onclick="move('scissors')">x</button><button onclick="move('paper')">h</button></div>` : `<div class="buttons">${room.state}</div>`)
 }
 
 async function createRoom (name, maxPlayers) {
@@ -144,7 +144,7 @@ function getCoordinates (k) {
 
 async function move (shape) {
   const { hash } = globalThis
-  const res = await fetch('/api/makeamove', {
+  const res = await fetch('/api/move', {
     method: 'POST',
     body: JSON.stringify({ hash, shape })
   })
