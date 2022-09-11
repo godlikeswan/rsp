@@ -20,6 +20,7 @@ export default class RoomsList extends EventEmitter {
     this.rooms = new Map()
     this.lastId = 0
     this.lastChangeTime = Date.now()
+    this.on('change', () => { this.lastChangeTime = Date.now() })
   }
 
   addRoom ({ name, maxPlayers }: RoomOptions) {
@@ -27,8 +28,7 @@ export default class RoomsList extends EventEmitter {
     const id = this.lastId
     const room = new Room({ id, name, maxPlayers }, this.game)
     this.rooms.set(id, room)
-    this.lastChangeTime = Date.now()
-    this.emit('roomschange')
+    this.emit('change')
     return id
   }
 
@@ -43,8 +43,7 @@ export default class RoomsList extends EventEmitter {
     if (!room) throw new Error('room not found')
     if (name) room.setName(name)
     if (maxPlayers) room.setMaxPlayers(maxPlayers)
-    this.lastChangeTime = Date.now()
-    this.emit('roomschange')
+    this.emit('change')
   }
 
   removeRoom (id: number) {
@@ -52,8 +51,7 @@ export default class RoomsList extends EventEmitter {
     if (!room) throw new Error('room not found')
     room.remove()
     this.rooms.delete(id)
-    this.lastChangeTime = Date.now()
-    this.emit('roomschange')
+    this.emit('change')
   }
 
   toJSON () {

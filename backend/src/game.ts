@@ -4,7 +4,7 @@ import RoomsList, { RoomOptions } from './rooms-list.js'
 import PlayersList from './players-list.js'
 import { PlayerOptions } from './player.js'
 
-export default class Game { // TODO: add time tracking to events, add match events (and room state)
+export default class Game {
   rooms: RoomsList
   players: PlayersList
 
@@ -17,18 +17,15 @@ export default class Game { // TODO: add time tracking to events, add match even
     const hash = this.players.addPlayer(reqBody as PlayerOptions)
     res.writeHead(200)
     res.end(JSON.stringify({ hash }))
-    console.log('new player registered: ', this.players.getPlayer(hash)?.hash)
   }
 
   handleGetRooms (reqBody: unknown, res: ServerResponse) {
     const { hash } = reqBody as { hash: string, last: number }
-    console.log('handleGetRooms: (hash)', hash)
     // const player = this.players.getPlayer(hash)
     // if (!player) throw new Error()
     // player.stopAfkTimer()
     // player.lastRequestTime = Date.now()
     res.writeHead(200)
-    console.log('sending res: ', JSON.stringify({ rooms: this.rooms }))
     res.end(JSON.stringify({ rooms: this.rooms, last: this.rooms.lastChangeTime }))
     // player.setAfkTimer()
   }
@@ -51,7 +48,6 @@ export default class Game { // TODO: add time tracking to events, add match even
   handleAddRoom (reqBody: unknown, res: ServerResponse) {
     const id = this.rooms.addRoom(reqBody as RoomOptions)
     res.end(JSON.stringify({ id }))
-    console.log('new room added: ', this.rooms.getRoom(id))
   }
 
   handleJoinRoom (reqBody: unknown, res: ServerResponse) {
@@ -60,8 +56,6 @@ export default class Game { // TODO: add time tracking to events, add match even
     if (!player) throw new Error('There is no player with this hash')
     player.joinRoom(id)
     res.end(JSON.stringify({ room: this.rooms.getRoom(id).stringify(), last: this.rooms.getRoom(id).lastChangeTime }))
-    console.log('player ', hash, ' joined the room ', id)
-    console.log('sended: ', JSON.stringify({ room: this.rooms.getRoom(id).stringify(), last: this.rooms.getRoom(id).lastChangeTime }))
   }
 
   handleMove (reqBody: unknown, res: ServerResponse) {
@@ -69,19 +63,15 @@ export default class Game { // TODO: add time tracking to events, add match even
     const { hash, shape } = reqBody as MoveReq
     this.players.getPlayer(hash)?.move(shape)
     res.end(JSON.stringify({ result: 'ok' }))
-    console.log('player ', hash, ' made a move ', shape)
   }
 
   async handleGetRoomChange (reqBody: unknown, res: ServerResponse) {
     const { id, last } = reqBody as { id: number, last: number }
     const room = this.rooms.getRoom(id)
-    console.log('handleGetRoomChange(%d, %d): ', id, last)
     if (last < room.lastChangeTime) {
-      console.log('last < room.last')
       res.end(JSON.stringify({ room: room.stringify(), last: room.lastChangeTime }))
       return
     }
-    console.log('last > room.last')
     res.end(await Promise.race([this.waitForRoomChange(id), this.timeout()]))
   }
 
@@ -93,7 +83,7 @@ export default class Game { // TODO: add time tracking to events, add match even
 
   async waitForRoomsChange () {
     return new Promise((resolve) => {
-      this.rooms.once('roomschange', () => {
+      this.rooms.once('change', () => {
         resolve(JSON.stringify({ rooms: this.rooms }))
       })
     })
@@ -103,7 +93,6 @@ export default class Game { // TODO: add time tracking to events, add match even
     return new Promise((resolve) => {
       this.rooms.getRoom(roomId).once('change', () => {
         const room = this.rooms.getRoom(roomId)
-        console.log('last: ', room.lastChangeTime)
         resolve(JSON.stringify({ room: room.stringify(), last: room.lastChangeTime }))
       })
     })

@@ -7,14 +7,12 @@ async function getHash (name) {
     body: JSON.stringify({ name })
   })
   const { hash } = await res.json()
-  console.log('got hash: ', hash)
   globalThis.hash = hash
   return hash
 }
 
 async function getRooms () {
   const { hash } = globalThis
-  console.log('getting rooms w hash: ', hash)
   const res = await fetch('/api/getrooms', {
     method: 'POST',
     headers: {
@@ -23,7 +21,6 @@ async function getRooms () {
     body: JSON.stringify({ hash })
   })
   const { last, rooms } = await res.json()
-  console.log(rooms)
   globalThis.last = last
   return rooms
 }
@@ -42,7 +39,6 @@ async function startRoomsUpdateLoop () {
         signal: globalThis.controller.signal
       })
       const json = await res.json()
-      console.log('got: ', json)
       if ('next' in json) continue
       const { rooms, last } = json
       globalThis.last = last
@@ -59,13 +55,15 @@ async function initRooms (nickname) {
   if (!('hash' in globalThis)) {
     globalThis.hash = await getHash(nickname)
   }
+  globalThis.nickname = nickname
+  Array.from(document.querySelectorAll('.nickname')).forEach((n) => { n.innerHTML = nickname })
   const rooms = await getRooms()
   renderRooms(rooms)
   startRoomsUpdateLoop()
 }
 
 function renderRooms (rooms) {
-  const tbody = document.querySelector('tbody') // ????????
+  const tbody = document.querySelector('tbody')
   tbody.innerHTML = rooms.map((room) => `<tr>
 <td>${room.id}</td>
 <td>${room.name}</td>
@@ -76,7 +74,6 @@ function renderRooms (rooms) {
 
 async function joinRoom (id) {
   const { hash } = globalThis
-  console.log('joinRoom hash: ', hash)
   const res = await fetch('/api/joinroom', {
     method: 'POST',
     body: JSON.stringify({ hash, id })
@@ -90,6 +87,7 @@ async function joinRoom (id) {
 async function initRoom (id) {
   globalThis.controller.abort()
   const room = await joinRoom(id)
+  if (room.state === 'match' && room.players.find((player) => player.name === globalThis.nickname).moved === false) globalThis.movingState = 'moving'
   renderRoom(room)
   startRoomUpdateLoop(id)
 }
@@ -111,6 +109,8 @@ async function startRoomUpdateLoop (id) {
       if ('next' in json) continue
       const { last, room } = json
       globalThis.last = last
+      console.log(room.state, globalThis.nickname)
+      if (room.state === 'match' && room.players.find((player) => player.name === globalThis.nickname).moved === false) globalThis.movingState = 'moving'
       renderRoom(room)
     } catch (e) {
       console.log(e)
@@ -120,9 +120,28 @@ async function startRoomUpdateLoop (id) {
 }
 
 function renderRoom (room) {
-  const table = document.getElementById('table')
-  table.innerHTML = room.players.map((player, i, a) => `<div class="player" style="top: ${getCoordinates(i / a.length).y}%; left: ${getCoordinates(i / a.length).x}%;">${player.name}</div>`)
-    .join('\n') + ((/^match$/.test(room.state)) ? `<div class="buttons"><button onclick="move('rock')">o</button><button onclick="move('scissors')">x</button><button onclick="move('paper')">h</button></div>` : `<div class="buttons">${room.state}</div>`)
+  const button = (shape) => `<button onclick="move('${shape}')">${shape}</button>`
+  const prime = (className, ...els) => `<div class="${className}">${els.join('')}</div>`
+  const controls = () => prime('buttons', button('rock'), button('scissors'), button('paper'))
+  const message = (msg, timer) => {
+    if (!timer) return prime('message', msg)
+    const t = (timer) => {
+      const el = document.getElementById('timer')
+      if (el) el.innerHTML = timer
+      if (timer > 1) setTimeout(t, 1000, timer - 1)
+    }
+    setTimeout(t, 1000, timer - 1)
+    return prime('message', `<div>${msg}</div><div id="timer">${timer}</div>`)
+  }
+  const player = (player, i, a) => `<div class="player" style="top: ${getCoordinates(i / a.length).y}%; left: ${getCoordinates(i / a.length).x}%;">${player.name}</div>`
+  console.log(room, globalThis.movingState)
+  let table = room.players.map(player).join('\n')
+  if (room.state === 'match' && globalThis.movingState === 'moving') table += controls()
+  else if (room.state === 'match' && globalThis.movingState === 'waiting') table += message('Waiting for others to move')
+  else if (room.state === 'break') table += message(room.state, 10)
+  else if (room.state === 'waiting') table += message('Waiting for other players to join')
+  else if (room.state === 'result') table += message(`${room.result} won!`, 10)
+  document.getElementById('table').innerHTML = table
 }
 
 async function createRoom (name, maxPlayers) {
@@ -132,7 +151,7 @@ async function createRoom (name, maxPlayers) {
     body: JSON.stringify({ hash, name, maxPlayers })
   })
   const room = await res.json()
-  renderRoom(room.id)
+  initRoom(room.id)
 }
 
 function getCoordinates (k) {
@@ -144,11 +163,16 @@ function getCoordinates (k) {
 
 async function move (shape) {
   const { hash } = globalThis
-  const res = await fetch('/api/move', {
-    method: 'POST',
-    body: JSON.stringify({ hash, shape })
-  })
-  const j = await res.json()
+  try {
+    globalThis.movingState = 'waiting'
+    const res = await fetch('/api/move', {
+      method: 'POST',
+      body: JSON.stringify({ hash, shape })
+    })
+    const j = await res.json()
+  } catch (e) {
+    globalThis.movingState = 'moving'
+  }
 }
 
 async function wait (ms) {

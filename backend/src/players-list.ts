@@ -21,8 +21,11 @@ export default class PlayersList {
     return hash
   }
 
-  getPlayer (hash: string) {
-    return this.players.get(hash)
+  getPlayer (hash: string, safe: boolean = false) {
+    const player = this.players.get(hash)
+    if (!player) return
+    if (!safe) return player
+    // const { name, shape } = player
   }
 
   renamePlayer (hash: string, name: string) {
