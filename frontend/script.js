@@ -68,7 +68,9 @@ function renderRooms (rooms) {
 <td>${room.id}</td>
 <td>${room.name}</td>
 <td>${room.numPlayers}/${room.maxPlayers}</td>
-<td><a href="#room" onclick="initRoom(${room.id})">-></a></td>
+<td><a href="#room" onclick="initRoom(${room.id})">
+<img src="data:image/svg+xml,%3Csvg width='48' height='21' viewBox='0 0 48 21' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10.5L46 10.5M46 10.5L31.6721 20M46 10.5L31.6721 1' stroke='black' stroke-width='2'/%3E%3C/svg%3E">
+</a></td>
 </tr>`).join('\n') + `<tr><td>#</td><td><input id="new-room-name" type="text"></td><td><input id="new-room-max-players" type="number"></td><td><a href="#room" onclick="createRoom(document.getElementById('new-room-name').value, document.getElementById('new-room-max-players').value)">+</a></td></tr>`
 }
 
@@ -119,8 +121,14 @@ async function startRoomUpdateLoop (id) {
   }
 }
 
+const icons = {
+  rock: "data:image/svg+xml,%3Csvg width='46' height='46' viewBox='0 0 46 46' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='23' cy='23' r='22' stroke='black' stroke-width='2'/%3E%3C/svg%3E",
+  scissors: "data:image/svg+xml,%3Csvg width='49' height='49' viewBox='0 0 49 49' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='1.70711' y1='1.29289' x2='47.7071' y2='47.2929' stroke='black' stroke-width='2'/%3E%3Cline y1='-1' x2='65.0538' y2='-1' transform='matrix(-0.707107 0.707107 0.707107 0.707107 48 3)' stroke='black' stroke-width='2'/%3E%3C/svg%3E",
+  paper: "data:image/svg+xml,%3Csvg width='45' height='46' viewBox='0 0 45 46' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='1' y='1' width='43' height='44' stroke='black' stroke-width='2'/%3E%3C/svg%3E"
+}
+
 function renderRoom (room) {
-  const button = (shape) => `<button onclick="move('${shape}')">${shape}</button>`
+  const button = (shape) => `<button onclick="move('${shape}')"><img src="${icons[shape]}"></button>`
   const prime = (className, ...els) => `<div class="${className}">${els.join('')}</div>`
   const controls = () => prime('buttons', button('rock'), button('scissors'), button('paper'))
   const message = (msg, timer) => {
