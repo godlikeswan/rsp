@@ -47,7 +47,7 @@ export default class Room extends EventEmitter {
     this.playersHashes.set(player.hash, null)
     this.emit('change', 'player joined')
     this.game.rooms.emit('change', 'player joined')
-    if (this.playersHashes.size > 1) {
+    if (this.state === 'waiting' && this.playersHashes.size > 1) {
       this.state = 'break'
       this.emit('change', 'state changed')
       setTimeout(this.startMatch, 10000)
@@ -57,6 +57,7 @@ export default class Room extends EventEmitter {
   startMatch () {
     if (this.playersHashes.size < 2) {
       this.state = 'waiting'
+      this.emit('change', 'state changed')
       return
     }
     this.result = null
@@ -69,8 +70,14 @@ export default class Room extends EventEmitter {
   }
 
   handleLeavedPlayer (player: Player) {
+    if (shapes.has(this.playersHashes?.get(player.hash) ?? '')) this.playersMovedCount -= 1
     this.playersHashes.delete(player.hash)
     this.emit('change', 'player leaved')
+    this.game.rooms.emit('change', 'player leaved')
+    if (this.playersHashes.size < 2) {
+      this.state = 'waiting'
+      this.emit('change', 'state changed')
+    }
   }
 
   remove () {}

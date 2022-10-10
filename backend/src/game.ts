@@ -75,6 +75,13 @@ export default class Game {
     res.end(await Promise.race([this.waitForRoomChange(id), this.timeout()]))
   }
 
+  async handleLeaveRoom (reqBody: unknown, res: ServerResponse) {
+    const { hash } = reqBody as { hash: string }
+    this.players.getPlayer(hash)?.leaveRoom()
+    res.writeHead(200)
+    res.end(JSON.stringify({ rooms: this.rooms, last: this.rooms.lastChangeTime }))
+  }
+
   async timeout (s = 25) {
     return new Promise((resolve) => {
       setTimeout(resolve, s * 1000, JSON.stringify({ next: true }))

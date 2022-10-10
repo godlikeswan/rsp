@@ -86,6 +86,26 @@ async function joinRoom (id) {
   return room
 }
 
+async function leaveRoom () {
+  const { hash } = globalThis
+  const res = await fetch('/api/leaveroom', {
+    method: 'POST',
+    body: JSON.stringify({ hash })
+  })
+  const { last, rooms } = await res.json()
+  globalThis.last = last
+  globalThis.state = 'rooms'
+  return rooms
+}
+
+async function uninitRoom () {
+  globalThis.state = 'lobby'
+  globalThis.controller.abort()
+  const rooms = await leaveRoom()
+  renderRooms(rooms)
+  startRoomsUpdateLoop()
+}
+
 async function initRoom (id) {
   globalThis.controller.abort()
   const room = await joinRoom(id)
@@ -142,7 +162,6 @@ function renderRoom (room) {
     return prime('message', `<div>${msg}</div><div id="timer">${timer}</div>`)
   }
   const player = (player, i, a) => `<div class="player" style="top: ${getCoordinates(i / a.length).y}%; left: ${getCoordinates(i / a.length).x}%;">${player.name}</div>`
-  console.log(room, globalThis.movingState)
   let table = room.players.map(player).join('\n')
   if (room.state === 'match' && globalThis.movingState === 'moving') table += controls()
   else if (room.state === 'match' && globalThis.movingState === 'waiting') table += message('Waiting for others to move')

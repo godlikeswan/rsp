@@ -25,12 +25,7 @@
             <th>action</th>
           </tr>
         </thead>
-        <tbody>
-          <tr><td>1</td><td>First room</td><td>1/2</td><td><a href="#room">-></a></td></tr>
-          <tr><td>2</td><td>Second room</td><td>3/5</td><td>-></td></tr>
-          <tr><td>3</td><td>Third room</td><td>2/2</td><td>-></td></tr>
-          <tr><td>+</td><td></td><td></td><td>=)</td></tr>
-        </tbody>
+        <tbody></tbody>
       </table>
     </main>
   </section>
@@ -40,23 +35,20 @@
       <div class="nickname">#nickname</div>
     </header>
     <main class="room">
-      <a class="button-back" href="#rooms">
+      <a class="button-back" href="#rooms" onclick="uninitRoom()">
         <img src="data:image/svg+xml,%3Csvg width='48' height='21' viewBox='0 0 48 21' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M48 10.5H2M2 10.5L16.3279 1M2 10.5L16.3279 20' stroke='black' stroke-width='2'/%3E%3C/svg%3E">
       </a>
-      <div id="table">
-        <div class="player player1">ttrolka</div>
-        <div class="player player2">enbh</div>
-        <div class="player player3">player3</div>
-        <div class="buttons">
-          <button>o</button><button>x</button><button>h</button>
-        </div>
-      </div>
+      <div id="table"></div>
     </main>
   </section>
   <section id="home">
   <div class="logo"><h1>RSP</h1><p>Rock<br>Scissors<br>Paper</p></div>
   <div class="form">
-    <input type="text" name="" id="" placeholder="Enter your nickname&hellip;"><a href="#rooms" onclick="initRooms(document.querySelector('input[type=\'text\']').value)"><span>→</span></a>
+    <input type="text" name="" id="" placeholder="Enter your nickname&hellip;">
+    <a href="#rooms" onclick="initRooms(document.querySelector('input[type=\'text\']').value)">
+      <span>→</span>
+      <!-- arrow: <img src="data:image/svg+xml,%3Csvg width='48' height='21' viewBox='0 0 48 21' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10.5L46 10.5M46 10.5L31.6721 20M46 10.5L31.6721 1' stroke='black' stroke-width='2'/%3E%3C/svg%3E"> -->
+    </a>
   </div>
   </section>
 </body>

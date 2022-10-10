@@ -33,7 +33,7 @@ export default class Player {
   }
 
   leaveRoom () {
-    if (!this.roomId) throw new Error()
+    if (!this.roomId) return
     this.game.rooms.getRoom(this.roomId).handleLeavedPlayer(this)
     this.roomId = null
   }
@@ -43,7 +43,7 @@ export default class Player {
   }
 
   move (shape: string) {
-    if (!this.roomId) throw new Error()
+    if (!this.roomId) return
     this.isMoved = true
     this.game.rooms.getRoom(this.roomId).handlePlayerMove(this, shape)
   }
