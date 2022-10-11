@@ -1,6 +1,8 @@
-FROM node:16.16.0
+FROM node:latest
+USER node
 WORKDIR /home/node
-COPY . .
+COPY --chown=node . .
 RUN npm install
 RUN npm run build
 CMD npm start
+
