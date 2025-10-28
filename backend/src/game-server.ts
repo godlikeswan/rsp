@@ -42,33 +42,37 @@ export default class GameServer extends Server {
         return
       }
       if (/^\/api\//.test(req.url)) {
-        const path = (req.url.match(/^\/api\/(.*)$/) as string[])[1]
-        const reqBody = await GameServer.parseBody(req)
-        switch (path) {
-          case 'gethash':
-            this.game.handleGetHash(reqBody, res)
-            break
-          case 'getrooms':
-            this.game.handleGetRooms(reqBody, res)
-            break
-          case 'getroomschange':
-            this.game.handleGetRoomsChange(reqBody, res)
-            break
-          case 'addroom':
-            this.game.handleAddRoom(reqBody, res)
-            break
-          case 'joinroom':
-            this.game.handleJoinRoom(reqBody, res)
-            break
-          case 'move':
-            this.game.handleMove(reqBody, res)
-            break
-          case 'getroomchange':
-            this.game.handleGetRoomChange(reqBody, res)
-            break
-          case 'leaveroom':
-            this.game.handleLeaveRoom(reqBody, res)
-            break
+        try {
+          const path = (req.url.match(/^\/api\/(.*)$/) as string[])[1]
+          const reqBody = await GameServer.parseBody(req)
+          switch (path) {
+            case 'gethash':
+              await this.game.handleGetHash(reqBody, res)
+              break
+            case 'getrooms':
+              await this.game.handleGetRooms(reqBody, res)
+              break
+            case 'getroomschange':
+              await this.game.handleGetRoomsChange(reqBody, res)
+              break
+            case 'addroom':
+              await this.game.handleAddRoom(reqBody, res)
+              break
+            case 'joinroom':
+              await this.game.handleJoinRoom(reqBody, res)
+              break
+            case 'move':
+              await this.game.handleMove(reqBody, res)
+              break
+            case 'getroomchange':
+              await this.game.handleGetRoomChange(reqBody, res)
+              break
+            case 'leaveroom':
+              await this.game.handleLeaveRoom(reqBody, res)
+              break
+          }
+        } catch (e: unknown) {
+          res.end(JSON.stringify(e))
         }
       }
     })

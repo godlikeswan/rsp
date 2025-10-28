@@ -150,7 +150,7 @@ const icons = {
 function renderRoom (room) {
   const button = (shape) => `<button onclick="move('${shape}')"><img src="${icons[shape]}"></button>`
   const prime = (className, ...els) => `<div class="${className}">${els.join('')}</div>`
-  const controls = () => prime('buttons', button('rock'), button('scissors'), button('paper'))
+  const controls = () => prime('buttons', button('rock'), button('paper'), button('scissors'))
   const message = (msg, timer) => {
     if (!timer) return prime('message', msg)
     const t = (timer) => {

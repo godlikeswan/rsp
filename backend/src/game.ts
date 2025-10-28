@@ -72,7 +72,13 @@ export default class Game {
       res.end(JSON.stringify({ room: room.stringify(), last: room.lastChangeTime }))
       return
     }
-    res.end(await Promise.race([this.waitForRoomChange(id), this.timeout()]))
+    try {
+      const resBody = await this.waitForRoomChange(id, AbortSignal.timeout(25 * 1000))
+      res.end(resBody)
+    } catch (e: unknown) {
+      res.end(JSON.stringify({ next: true }))
+    }
+    res.end(await Promise.race([, this.timeout()]))
   }
 
   async handleLeaveRoom (reqBody: unknown, res: ServerResponse) {
@@ -96,11 +102,20 @@ export default class Game {
     })
   }
 
-  async waitForRoomChange (roomId: number) {
-    return new Promise((resolve) => {
-      this.rooms.getRoom(roomId).once('change', () => {
+  async waitForRoomChange (roomId: number, signal: AbortSignal) {
+    return new Promise((resolve, reject) => {
+      if (signal.aborted) reject(signal.reason)
+
+      const listener = () => {
         const room = this.rooms.getRoom(roomId)
         resolve(JSON.stringify({ room: room.stringify(), last: room.lastChangeTime }))
+      }
+      const room = this.rooms.getRoom(roomId)
+      room.once('change', listener)
+
+      signal.addEventListener('abort', () => {
+        room.off('change', listener)
+        reject(signal.reason)
       })
     })
   }

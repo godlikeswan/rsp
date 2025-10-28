@@ -30,7 +30,7 @@ export default class Room extends EventEmitter {
     this.playersHashes = new Map()
     this.lastChangeTime = Date.now()
     this.startMatch = this.startMatch.bind(this)
-    this.on('change', () => { this.lastChangeTime = Date.now() })
+    this.on('change', () => { this.lastChangeTime = Date.now(), console.log(this) })
   }
 
   setName (name: string) {
@@ -139,6 +139,7 @@ export default class Room extends EventEmitter {
       this.result = 'paper'
       this.emit('change', 'match finished', 'paper')
     }
+    console.log(this.result)
     setTimeout(() => { this.startMatch() }, 10000)
   }
 
