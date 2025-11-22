@@ -16,6 +16,12 @@ Web-based multiplayer Rock, Paper, Scissors game.
 
 ## Instructions:
 
+### Install dependencies:
+
+```bash
+npm i
+```
+
 ### Build:
 
 ```bash
